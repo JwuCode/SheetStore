@@ -1,0 +1,8 @@
+.banner  {
+    padding: "30px";
+    height: 100vh;
+    width: 400px;
+    background-color: "#247d7a";
+    
+    transition: background-color .5s ease-in, transform, .5s ease-in, height .5s ease-in;
+}

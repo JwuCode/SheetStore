@@ -1,0 +1,30 @@
+.App {
+    font-family: sans-serif;
+    text-align: center;
+  }
+  
+
+
+  /* For pdf */
+  .react-pdf__Page {
+    margin-bottom: 10px;
+  }
+
+
+  
+  .react-pdf__Page__canvas {
+    margin: 0 auto;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  /* For all pages */
+  .all-page-container {
+    height: 100%;
+    max-height: 800px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+.font-link {
+    font-family: 'Press Start 2P';
+  }

@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/05b602ea-e632-4987-ab93-f235c673cd88/resourceGroups/JerryWeb/providers/Microsoft.Web/sites/musicSheetAPI",
+    "appService.deploySubpath": "music-sheet-api"
+}
