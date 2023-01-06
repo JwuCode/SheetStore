@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
-import { useState} from 'react';
-
+import { useState } from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
@@ -10,7 +9,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import './scrollbar.css'
 const Stockgame = () => {
-  
+
   const [money, setMoney] = useState(localStorage.getItem('money'))
   const [amountToSell, setAmountToSell] = React.useState("")
   const [stockToSell, setStockToSell] = React.useState("")
@@ -53,17 +52,17 @@ const Stockgame = () => {
       date.getSeconds()
     );
   }
- 
+
   const callAPI = async () => {
     const response = await fetch(
       "http://127.0.0.1:5000/api/stocks/list?names=" + localStorage.getItem('stocks')
     ).then((response) => response.json())
 
 
-      setStocks(response);
+    setStocks(response);
 
 
-      
+
 
   };
 
@@ -75,53 +74,65 @@ const Stockgame = () => {
     setAllStocks(listall);
 
   };
+  function stockExists(array, name) {
+    for (let i = 0; i < array.length; i++) {
+      if (array[i] != name) {
+        return false;
+      }
+    }
+    return true;
+  }
 
-   async function purchaseStock() {
-    var money = parseFloat(localStorage.getItem('money'))
-    var oldList = localStorage.getItem('stocks')
-    if (parseFloat(localStorage.getItem(stockToPurchase)) != null) {
-      var amountOwned = parseFloat(localStorage.getItem(stockToPurchase))
-    } else {
-      var amountOwned = 0.0;
+
+  async function purchaseStock() {
+    if (stockToPurchase != ""){
+      setStockToPurchase(stockToPurchase.toUpperCase())
+      var money = parseFloat(localStorage.getItem('money'))
+      var oldList = localStorage.getItem('stocks')
+      if (parseFloat(localStorage.getItem(stockToPurchase)) != null) {
+        var amountOwned = parseFloat(localStorage.getItem(stockToPurchase))
+      } else {
+        var amountOwned = 0.0;
+      }
+  
+  
+  
+      if (oldList === null) {
+        oldList = "";
+      }
+      if (stockExists(oldList.split(","), stockToPurchase.toUpperCase())) {
+        localStorage.setItem(stockToPurchase.toUpperCase(), String(amountOwned + parseFloat(amountBuying)))
+        callAPI()
+  
+        var price = parseFloat(stocks.filter(stock => stock.name === stockToPurchase)[0]['currentPrice'])
+        localStorage.setItem('money', String((money - (price * parseFloat(amountBuying))).toFixed(2)))
+  
+      } else if (oldList === "") {
+        oldList = stockToPurchase.toUpperCase();
+        localStorage.setItem('stocks', oldList);
+        localStorage.setItem(stockToPurchase.toUpperCase(), amountBuying)
+        callAPI();
+  
+        var price = await fetch(
+          "http://127.0.0.1:5000/api/stocks/list?names=" + stockToPurchase
+        ).then((price) => price.json())
+        price = parseFloat(price[0]['currentPrice'])
+        localStorage.setItem('money', String((money - (price * parseFloat(amountBuying))).toFixed(2)))
+      }
+      else {
+        oldList = oldList + ","
+        localStorage.setItem('stocks', oldList + stockToPurchase.toUpperCase());
+        localStorage.setItem(stockToPurchase.toUpperCase(), amountBuying)
+        callAPI();
+  
+        var price = await fetch(
+          "http://127.0.0.1:5000/api/stocks/list?names=" + stockToPurchase
+        ).then((price) => price.json())
+        price = parseFloat(price[0]['currentPrice'])
+        localStorage.setItem('money', String((money - (price * parseFloat(amountBuying))).toFixed(2)))
+      }
     }
     
-
-
-    if (oldList === null) {
-      oldList = "";
-    } 
-    if (oldList.includes(stockToPurchase.toUpperCase())) {
-      localStorage.setItem(stockToPurchase.toUpperCase(), String(amountOwned+ parseFloat(amountBuying)))
-      callAPI()
-
-      var price = parseFloat(stocks.filter(stock => stock.name === stockToPurchase)[0]['currentPrice'])
-      localStorage.setItem('money', String((money - price).toFixed(2)))
-
-    } else if (oldList === ""){
-      oldList = stockToPurchase;
-      localStorage.setItem('stocks', oldList);
-      localStorage.setItem(stockToPurchase.toUpperCase(), amountBuying)
-     callAPI();
-
-     var price  = await fetch(
-      "http://127.0.0.1:5000/api/stocks/list?names=" + stockToPurchase
-    ).then((price) => price.json())
-       price = parseFloat(price[0]['currentPrice'])
-      localStorage.setItem('money', String((money - price).toFixed(2)))
-    }
-    else
-    {
-      oldList = oldList + ","
-      localStorage.setItem('stocks', oldList + stockToPurchase.toUpperCase());
-      localStorage.setItem(stockToPurchase.toUpperCase(), amountBuying)
-       callAPI();
-
-       var price  = await fetch(
-        "http://127.0.0.1:5000/api/stocks/list?names=" + stockToPurchase
-      ).then((price) => price.json())
-         price = parseFloat(price[0]['currentPrice'])
-        localStorage.setItem('money', String((money - price).toFixed(2)))
-    }
   }
 
   function sellStock() {
@@ -141,16 +152,16 @@ const Stockgame = () => {
       callAPI()
 
     }
-    
 
 
 
 
-    
+
+
 
 
   }
- 
+
   function addmoney() {
     var oldmoney = localStorage.getItem('money')
     localStorage.setItem('money', parseInt(oldmoney) + 500)
@@ -170,7 +181,7 @@ const Stockgame = () => {
   }
 
   useEffect(() => {
-  
+
     getStocks()
     addStock((localStorage.getItem('stocks')));
     if (localStorage.getItem('money') === null) {
@@ -186,8 +197,8 @@ const Stockgame = () => {
     }
 
   }, []);
-  
-  
+
+
   const styles = {
     button: {
       fontSize: "20px",
@@ -209,33 +220,52 @@ const Stockgame = () => {
       justifyContent: "flexEnd"
     },
     personalStocks: {
-      height: "400px",
+      height: "600px",
       display: "inline",
-      width: '700px',
+      width: '95%',
       overflow: "scroll",
       overflowX: "auto",
       overflowY: "auto",
       backgroundColor: "#2f1b61",
-      padding: "20px",
+      padding: "20px 25px",
       borderRadius: "20px",
-      marginRight: " 20px",
-      marginLeft: " 20px",
+      marginRight: " 40px",
+      marginLeft: " 40px",
       marginTop: " 20px",
       marginBottom: " 20px",
+      borderSpacing: "1px 0"
 
     },
-    table:
-    {
-      padding: "0 10px",
-    },
+
     thead: {
-      width: '700px',
+      textAlign: "center",
       margin: "auto",
+      fontSize: "20px"
 
- 
+
+    },
+    menu: {
+      height: "400px",
+      width: "50%",
+      padding: "20px 25px",
+      borderRadius: "20px",
+      backgroundColor: "#2f1b61",
+      marginTop: " 20px",
+      marginRight: " 40px",
+      marginLeft: " 40px",
+
+    },
+    buymenu: {
+      marginTop: "30px",
+      padding: "0px",
+      fontSize: "15px"
+
+    },
+    purchaseButton: {
+      width: "100px",
+      height: "50px",
       backgroundColor: "red"
-
-    }
+    },
   }
 
 
@@ -244,51 +274,57 @@ const Stockgame = () => {
     <div style={styles.container} >
       <div style={styles.colm}>
         <table id="style-2" style={styles.personalStocks}>
+          <caption style={styles.thead}>My Portfolio</caption>
+          <tbody>
 
-        <tbody>
-        <tr style={styles.thead} >
-          <th>My Portfolio</th></tr>
-          <tr >
-            <th >name</th>
-            <th>currentPrice</th>
-            <th>afterhoursPrice</th>
-            <th>currently owned</th>
-            <th>value</th>
-          </tr>
-          {stocks.map(({ name, currentPrice, afterhoursPrice }) => (
-            <tr key={name} >
-              <td>{name}</td>
-              <td>{currentPrice}</td>
-              <td>{afterhoursPrice}</td>
-              <td>{localStorage.getItem(name)}</td>
-              <td>{(parseFloat(localStorage.getItem(name)) * parseFloat(currentPrice)).toFixed(2)}</td>
-
+            <tr >
+              <th >Name</th>
+              <th>Current Price</th>
+              <th>Afterhours Price</th>
+              <th>Currently Owned</th>
+              <th>Value</th>
             </tr>
-          ))}</tbody>
-      </table></div>
-      <div>
+            {stocks.map(({ name, currentPrice, afterhoursPrice }) => (
+              <tr key={name} >
+                <td>{name}</td>
+                <td>{currentPrice}</td>
+                <td>{afterhoursPrice}</td>
+                <td>{localStorage.getItem(name)}</td>
+                <td>{(parseFloat(localStorage.getItem(name)) * parseFloat(currentPrice)).toFixed(2)}</td>
 
-        <button style={styles.button} onClick={clearStocks}>CLEAR</button>
+              </tr>
+            ))}</tbody>
+        </table></div>
 
-        <input
-          type="text"
-          value={stockToPurchase}
-          onChange={(e) => setStockToPurchase(e.target.value)}
-        />
 
-        <span></span>
-        <input
-          type="text"
-          value={amountBuying}
-          onChange={(d) => setAmountToBuy(d.target.value)}
-        />
-        <button onClick={purchaseStock}>SUBMIT</button>
+      <div style={styles.colm}>
+        <div style={styles.menu}>
+          <p style={styles.thead}>Buy/Sell Menu</p>
+          <div style={styles.buymenu}>
+            <p >Stock to Purchase</p>
+            <input
+              type="text"
+              value={stockToPurchase}
+              onChange={(e) => setStockToPurchase(e.target.value)}
+            />
 
-      </div>
+            <span></span>
+            <p>Amount to Purchase</p>
+            <input
+              type="text"
+              value={amountBuying}
+              onChange={(d) => setAmountToBuy(d.target.value)}
+            />
+            <button type="button" styles={styles.purchaseButton} onClick={purchaseStock}>Purchase</button>
+          </div>
+
+
+        </div></div>
       <div><Clock /></div>
       <div>        <button onClick={handleClickOpen}>
         Sell
       </button>
+        <button style={styles.button} onClick={clearStocks}>CLEAR</button>
         <dialog id="showDialog" >
           Sell Stock
 
@@ -304,7 +340,7 @@ const Stockgame = () => {
             value={amountToSell}
             onChange={(g) => setAmountToSell(g.target.value)}
           />
-         <button onClick={sellStock}>submit</button> </dialog></div>
+          <button onClick={sellStock}>submit</button> </dialog></div>
 
       <div>{localStorage.getItem('money')}
         <button onClick={resetmoney}>reset money</button>

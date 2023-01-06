@@ -17,3 +17,12 @@
   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
   background-color: #8c22ac;
 }
+
+th {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 40px;
+  padding-right: 40px;
+
+
+}
