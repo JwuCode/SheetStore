@@ -288,6 +288,36 @@ const Database = () => {
     test: {
       height: "100%",
       minHeight: "100vh"
+    },
+    info: {
+      padding: "10px",
+      backgroundColor: "#0a1c57",
+      borderRadius: "20px",
+      marginTop: "30px",
+      marginLeft: "20px",
+      marginRight: "20px",
+      marginBottom: "20px",
+    },
+    title: {
+      fontSize: "18px",
+      marginLeft: "20px"
+    },
+    description: {
+      marginLeft: "20px",
+      marginRight: "20px"
+    },
+    list: {
+      color: "white",
+      paddingLeft: "0px",
+
+      marginLeft: "20px",
+      fontWeight: "normal",
+    },
+    link: {
+      color: "white",
+      textDecoration: "none",
+      height: "40px"
+      
     }
   }
 
@@ -298,13 +328,26 @@ const Database = () => {
         <div style={styles.listcontainer}>
           <div style={styles.searchbar}><form ><input style={styles.inputstyle} type="text" onKeyUp={(e) => { setSearchInput(e.target.value.toLowerCase()) }} placeholder="Search for sheets..." /></form></div>
           <div>
-
             <Table data={filteredSheets} />
           </div>
         </div>
         <div style={styles.tagcontainer}>
-          <p></p>
-          <p >TAGS PLACEHOLDER</p>
+          <div style={styles.info}>
+            <p style={styles.title}>SheetStore</p>
+            <p style={styles.description}> I created this website to store my sheets, and make it easy to search and preview. Right now, the music genres in the music sheets is a little sparse, so as I add more sheets, I will eventually add tags and more filter functionality</p>
+            </div>
+            <div style={styles.info}>
+              <p style={styles.title}> Current Favorite Youtubers</p>
+              <p style={styles.description}> Here are some of my favorite arrangers:
+              <ul style={styles.list}>
+  <li><a style={styles.link} href="https://www.youtube.com/@fruitanimeonpiano">Fruit</a></li>
+  <li><a style={styles.link} href="https://www.youtube.com/@Animenzzz">Animenz</a></li>
+  <li><a style={styles.link} href="https://www.youtube.com/@Jumpny2010">Jumpny2010</a></li>
+</ul>
+              </p>
+            </div>
+        
+          
         </div>
       </div>
     </div>
