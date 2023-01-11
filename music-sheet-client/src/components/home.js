@@ -47,11 +47,11 @@ const Home = () => {
       fontSize: "25px",
       
       backgroundColor: "transparent",
-      width: "700px",
+      width: "300px",
       position: "absolute",
-     bottom: "-250px",
+     bottom: "-360px",
   
-      right: "0px",
+      right: "150px",
       height: "98px",
       textAlign: "center",
       
@@ -143,13 +143,29 @@ const Home = () => {
     comp: {
       zIndex: "3",
       position: "absolute"
+    },
+    fish: {
+      fontSize: "25px",
+      
+      backgroundColor: "transparent",
+      width: "75px",
+      position: "absolute",
+     bottom: "-570px",
+  
+      right: "685px",
+      height: "98px",
+      textAlign: "center",
+      
+      color: "#c7c7c7",
+      zIndex: "4",
+
     }
   };
 
  
 
 /*<p style={homeStyles.title}>This is my personal website, where I test stuff</p>
-            <p style={homeStyles.bio}>I'm currently a highschooler in Mississauga, ON </p>
+           
   */
   return (
 
@@ -170,7 +186,7 @@ typewriter.changeDelay(70)
   }}
   /></div>
             <div style={homeStyles.bio}><p></p></div>
-            <div style={homeStyles.tip} ><Typewriter options={{
+            <div style={homeStyles.tip} > <Typewriter options={{
     cursor: " "
   }}
   
@@ -184,7 +200,9 @@ typewriter.changeDelay(70)
   .start();
   }}
   /></div>
-            
+             <p style={homeStyles.bio}>Hi ! <br></br>I'm a computer engineering student at the University of Waterloo.</p>
+             <p style={homeStyles.fish}>Try grabbing the koi</p>
+             <p style={homeStyles.hobbiesTitle}> I'm an avid learner who loves to find new things to do. Right now, I'm obsessed with with learning how to play piano, code websites, and make sushi.</p>
             <div style={homeStyles.comp}><Comp/></div>
           </div>
       );
