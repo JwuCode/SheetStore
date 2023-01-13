@@ -8,21 +8,30 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import './scrollbar.css'
+import { fontSize } from '@mui/system';
 const Stockgame = () => {
-
+  
   const [money, setMoney] = useState(localStorage.getItem('money'))
-  const [amountToSell, setAmountToSell] = React.useState("")
-  const [stockToSell, setStockToSell] = React.useState("")
+  const [amountToSell, setAmountToSell] = useState(1)
+  const [stockToSell, setStockToSell] = useState("")
   const [allStocks, setAllStocks] = useState([])
   const [stockToPurchase, setStockToPurchase] = useState("")
   const [amountBuying, setAmountToBuy] = useState(1)
   const [stocksList, addStock] = useState([])
-  const [stocks, setStocks] = useState([]);
+  const [stocks, setStocks] = useState([])
+  const [netPortfolio, setValue] = useState("0")
 
   var gfg = document.getElementById("showDialog");
+  var info = document.getElementById("showInfo");
+  const handleHoverOpen = () => {
+    info.show();
+  }
+  const handleHoverClose = () => {
+    info.close();
+  }
   const handleClickOpen = () => {
     setStockToSell("")
-    setAmountToSell("")
+    setAmountToSell(1)
     gfg.show();
   };
 
@@ -30,11 +39,18 @@ const Stockgame = () => {
     gfg.close();
   };
 
-
   const Clock = () => {
+    const clockStyle = {
+      clock: {
+        color: "#4d2d9f",
+        position: "absolute",
+        right: "30px",
+        bottom: "30px"
+      }
+    }
     const [date, setDate] = useState(new Date());
 
-    if (date.getSeconds() === 61 || date.getSeconds() === 61) {
+    if (date.getSeconds() === 1 || date.getSeconds() === 31) {
       if (localStorage.getItem('stocks') != null) {
         callAPI()
       }
@@ -47,20 +63,39 @@ const Stockgame = () => {
       return function cleanup() {
         clearInterval(timerId);
       };
+      
     }, []);
     return (
-      date.getSeconds()
+      <p style={clockStyle.clock}>{date.getSeconds()}</p>
+      
     );
   }
 
   const callAPI = async () => {
+
     const response = await fetch(
       "http://127.0.0.1:5000/api/stocks/list?names=" + localStorage.getItem('stocks')
+      
     ).then((response) => response.json())
 
-
+      
     setStocks(response);
 
+    if ((localStorage.getItem('stocks') != null)) {
+      var totalvalue = 0;
+      var list = localStorage.getItem('stocks').split(',')
+
+      for (let b = 0; b < list.length; b++) {
+        var tempPrice = await fetch(
+          "http://127.0.0.1:5000/api/stocks/list?names=" + list[b].toUpperCase()
+        ).then((tempPrice) => tempPrice.json())
+        tempPrice = parseFloat(tempPrice[0]['currentPrice'])
+            
+        totalvalue += ((parseFloat(localStorage.getItem(list[b].toUpperCase())) * parseFloat(tempPrice)))
+
+      }
+      setValue(totalvalue.toFixed(2))
+    }
 
 
 
@@ -76,91 +111,100 @@ const Stockgame = () => {
   };
   function stockExists(array, name) {
     for (let i = 0; i < array.length; i++) {
-      if (array[i] != name) {
-        return false;
+      if (String(array[i]) === String(name)) {
+        return true;
       }
     }
-    return true;
+    return false;
   }
 
 
   async function purchaseStock() {
-    if (stockToPurchase != ""){
+    if (stockToPurchase != "") {
       setStockToPurchase(stockToPurchase.toUpperCase())
       var money = parseFloat(localStorage.getItem('money'))
       var oldList = localStorage.getItem('stocks')
-      if (parseFloat(localStorage.getItem(stockToPurchase)) != null) {
-        var amountOwned = parseFloat(localStorage.getItem(stockToPurchase))
+      if (parseFloat(localStorage.getItem(stockToPurchase.toUpperCase())) != null) {
+        var amountOwned = parseFloat(localStorage.getItem(stockToPurchase.toUpperCase()))
       } else {
         var amountOwned = 0.0;
       }
-  
-  
-  
+
       if (oldList === null) {
         oldList = "";
       }
       if (stockExists(oldList.split(","), stockToPurchase.toUpperCase())) {
-        localStorage.setItem(stockToPurchase.toUpperCase(), String(amountOwned + parseFloat(amountBuying)))
-        callAPI()
-  
-        var price = parseFloat(stocks.filter(stock => stock.name === stockToPurchase)[0]['currentPrice'])
+        localStorage.setItem(stockToPurchase.toUpperCase(), (amountOwned + parseFloat(amountBuying)))
+
+        var price = parseFloat(stocks.filter(stock => stock.name === stockToPurchase.toUpperCase())[0]['currentPrice'])
         localStorage.setItem('money', String((money - (price * parseFloat(amountBuying))).toFixed(2)))
-  
+        callAPI()
+
       } else if (oldList === "") {
         oldList = stockToPurchase.toUpperCase();
         localStorage.setItem('stocks', oldList);
         localStorage.setItem(stockToPurchase.toUpperCase(), amountBuying)
         callAPI();
-  
+
         var price = await fetch(
-          "http://127.0.0.1:5000/api/stocks/list?names=" + stockToPurchase
+          "http://127.0.0.1:5000/api/stocks/list?names=" + stockToPurchase.toUpperCase()
         ).then((price) => price.json())
         price = parseFloat(price[0]['currentPrice'])
         localStorage.setItem('money', String((money - (price * parseFloat(amountBuying))).toFixed(2)))
+
       }
       else {
         oldList = oldList + ","
         localStorage.setItem('stocks', oldList + stockToPurchase.toUpperCase());
         localStorage.setItem(stockToPurchase.toUpperCase(), amountBuying)
         callAPI();
-  
+
         var price = await fetch(
-          "http://127.0.0.1:5000/api/stocks/list?names=" + stockToPurchase
+          "http://127.0.0.1:5000/api/stocks/list?names=" + stockToPurchase.toUpperCase()
         ).then((price) => price.json())
         price = parseFloat(price[0]['currentPrice'])
         localStorage.setItem('money', String((money - (price * parseFloat(amountBuying))).toFixed(2)))
       }
     }
-    
+
   }
 
-  function sellStock() {
-
-
+  async function sellStock() {
+    setStockToSell(stockToSell.toUpperCase())
     var money = parseFloat(localStorage.getItem('money'))
-    var price = parseFloat(stocks.filter(stock => stock.name === stockToSell)[0]['currentPrice'])
+    var price = await fetch(
+      "http://127.0.0.1:5000/api/stocks/list?names=" + stockToSell.toUpperCase()
+    ).then((price) => price.json())
+    price = parseFloat(price[0]['currentPrice'])
     var amount = parseFloat(amountToSell)
-    var amountOwned = parseFloat(localStorage.getItem(stockToSell))
+    var amountOwned = parseFloat(localStorage.getItem(stockToSell.toUpperCase()))
     var currentOwned = localStorage.getItem('stocks').split(',')
     if (amount === amountOwned) {
-      currentOwned.splice(currentOwned.indexOf(stockToSell), 1)
+      if (currentOwned.length === 1) {
+        localStorage.removeItem('stocks')
+      } else {
+        currentOwned.splice(currentOwned.indexOf(stockToSell.toUpperCase()), 1)
+        localStorage.setItem('stocks', currentOwned.toString())
+      }
+      
+      localStorage.removeItem(stockToSell.toUpperCase())
+      setStocks([{ name: "none", currentPrice: "0", afterhoursPrice: "0", }])
+      localStorage.setItem('money', String((money + (amount * price)).toFixed(2)))
+
+      callAPI()
     }
-    else {
-      localStorage.setItem(stockToSell, amountOwned - amount)
+    else if (amount > amountOwned){
+
+    } else {
+      localStorage.setItem(stockToSell.toUpperCase(), amountOwned - amount)
       localStorage.setItem('money', String((money + (amount * price)).toFixed(2)))
       callAPI()
+    }
 
     }
 
 
-
-
-
-
-
-
-  }
+  
 
   function addmoney() {
     var oldmoney = localStorage.getItem('money')
@@ -173,15 +217,30 @@ const Stockgame = () => {
 
   }
   function clearStocks() {
-    var myItem = localStorage.getItem('money');
+    var oldHighscore = localStorage.getItem('highscore')
+    var oldMoney = String((parseFloat(localStorage.getItem('money')) + parseFloat(netPortfolio)))
     localStorage.clear();
-    localStorage.setItem('money', myItem);
-
+    localStorage.setItem('money', 1000000);
+    if (parseFloat(oldHighscore) < parseFloat(oldMoney)) {
+      localStorage.setItem('highscore', oldMoney)
+    } else {
+      localStorage.setItem('highscore', oldHighscore)
+    }
     setStocks([{ name: "none", currentPrice: "0", afterhoursPrice: "0" }])
   }
+async function priceFetch(name) {
+  var price = await fetch(
+    "http://127.0.0.1:5000/api/stocks/list?names=" + name.toUpperCase()
+  ).then((price) => price.json())
+  price = parseFloat(price[0]['currentPrice'])
+  return price
+}
 
   useEffect(() => {
 
+    if (localStorage.getItem('highscore') === null) {
+      localStorage.setItem('highscore', 0)
+    }
     getStocks()
     addStock((localStorage.getItem('stocks')));
     if (localStorage.getItem('money') === null) {
@@ -203,13 +262,16 @@ const Stockgame = () => {
     button: {
       fontSize: "20px",
       height: "50px",
-      width: "100px"
+      width: "180px",
+      marginLeft: "30px",
+      marginTop: '15px',
+      marginBottom: '20px'
     },
     container: {
       display: "flex",
       flexDirection: "row",
       height: '100vh',
-      backgroundColor: "black"
+      backgroundColor: "#4d2d9f"
 
     },
     colm: {
@@ -245,14 +307,14 @@ const Stockgame = () => {
 
     },
     menu: {
-      height: "400px",
+      height: "330px",
       width: "50%",
       padding: "20px 25px",
       borderRadius: "20px",
       backgroundColor: "#2f1b61",
       marginTop: " 20px",
-      marginRight: " 40px",
-      marginLeft: " 40px",
+      marginRight: " 0px",
+      marginLeft: " 50px",
 
     },
     buymenu: {
@@ -263,8 +325,75 @@ const Stockgame = () => {
     },
     purchaseButton: {
       width: "100px",
+      height: "30px",
+      marginLeft: "20px",
+      marginTop: "20px"
+
+
+    },
+    stats: {
+      height: "390px",
+      padding: "20px 25px",
+      borderRadius: "20px",
+      backgroundColor: "#2f1b61",
+      marginTop: " 20px",
+      marginRight: " 40px",
+      width: "240px"
+
+    },
+    sellButton: {
+      width: "110px",
       height: "50px",
-      backgroundColor: "red"
+      marginLeft: "15px",
+      marginTop: "30px"
+    },
+    sellMenu: {
+      height: "270px",
+      bottom: "320px",
+      position: "absolute",
+      borderRadius: "5px",
+      width: "160px"
+    },
+    sellMenuButton: {
+      width: "100px",
+      height: "30px",
+      marginTop: "20px",
+      marginLeft: "25px"
+    },
+    hoverButton: {
+
+      position: "relative",
+      width: "20px",
+      height: "20px", 
+      marginLeft: "50%",
+      bottom: "35px",
+      left: "90px"
+    },
+    highscore: {
+
+    },
+    scoreinfo: {
+      position: "absolute",
+      color: "white",
+      backgroundColor: "black",
+      border: "none",
+      padding: "0px",
+      left: "1100px",
+      top: "250px",
+      textAlign: "center",
+      borderRadius: "20px",
+      height: "55px",
+      width: "250px"
+
+    },
+    adminTitle: {
+      textAlign: "center",
+      margin: "auto",
+      fontSize: "17px"
+    },
+    alignment: {
+      justifyContent: "center",
+  alignItems: "center"
     },
   }
 
@@ -301,51 +430,64 @@ const Stockgame = () => {
         <div style={styles.menu}>
           <p style={styles.thead}>Buy/Sell Menu</p>
           <div style={styles.buymenu}>
-            <p >Stock to Purchase</p>
+            <p >Stock to Purchase (Stock Codes Only)</p>
             <input
               type="text"
               value={stockToPurchase}
               onChange={(e) => setStockToPurchase(e.target.value)}
             />
-
-            <span></span>
             <p>Amount to Purchase</p>
             <input
               type="text"
               value={amountBuying}
               onChange={(d) => setAmountToBuy(d.target.value)}
             />
-            <button type="button" styles={styles.purchaseButton} onClick={purchaseStock}>Purchase</button>
+            <button type="button" style={styles.purchaseButton} onClick={purchaseStock}>Purchase</button>
+            <div>       
+               <button onClick={handleClickOpen} style={styles.sellButton}>
+               Open Sell Interface
+            </button >
+
+              <dialog id="showDialog" style={styles.sellMenu}>
+                
+              <p style={styles.thead}>Sell Interface</p>
+              <p>Stock To Sell:</p>
+                <input
+                  type="text"
+                  value={stockToSell}
+                  onChange={(x) => setStockToSell(x.target.value)}
+                />
+                <p>Amount To Sell:</p>
+               
+                <input
+                  type="text"
+                  value={amountToSell}
+                  onChange={(g) => setAmountToSell(g.target.value)}
+                />
+                <button onClick={sellStock} style={styles.sellMenuButton}>Submit</button> 
+                <button onClick={handleClose}  style={styles.sellMenuButton}>Close</button></dialog></div>
           </div>
-
-
-        </div></div>
-      <div><Clock /></div>
-      <div>        <button onClick={handleClickOpen}>
-        Sell
-      </button>
-        <button style={styles.button} onClick={clearStocks}>CLEAR</button>
-        <dialog id="showDialog" >
-          Sell Stock
-
-          <input
-            type="text"
-            value={stockToSell}
-            onChange={(x) => setStockToSell(x.target.value)}
-          />
-          <button onClick={handleClose}>close</button>
-          <br></br>
-          <input
-            type="text"
-            value={amountToSell}
-            onChange={(g) => setAmountToSell(g.target.value)}
-          />
-          <button onClick={sellStock}>submit</button> </dialog></div>
-
-      <div>{localStorage.getItem('money')}
-        <button onClick={resetmoney}>reset money</button>
-        <button onClick={addmoney}>add 500 money</button>
+        </div>
       </div>
+      <div style={styles.colm}>
+        <div style={styles.stats}>
+        <p style={styles.thead}>Stats/Admin</p>
+          <div><p>Money: {localStorage.getItem('money')}</p>
+          <p>Current Portfolio Value: {netPortfolio}</p>
+          <div ><p style={styles.highscore}>Highscore: {localStorage.getItem('highscore')}</p>
+             <img src="https://cdn-icons-png.flaticon.com/512/71/71768.png" style={styles.hoverButton} onMouseEnter={handleHoverOpen}
+            onMouseLeave={handleHoverClose}/>
+          </div>
+            <dialog id="showInfo" style={styles.scoreinfo}><p>Highscore saved on game reset</p></dialog>
+            <p style={styles.adminTitle}>Options</p>
+            <div style={styles.alignment}><button style={styles.button} onClick={clearStocks}>Reset Game</button></div>
+            <p style={styles.adminTitle}>Info</p>
+            <p>All stock information is scraped from YahooFinance. Stock display will automatically refresh every 30 seconds.</p>
+            <Clock style={styles.clock}/>
+          </div>
+        </div>
+      </div>
+
       <div ></div>
     </div>
   )

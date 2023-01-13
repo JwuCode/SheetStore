@@ -56,7 +56,7 @@ const playground = () => {
 return(
     <div style={styles.container}>
         <div style = {styles.information}>
-<h1>Here's where I test some side projects that I'm doing:</h1>
+<h1>Here's where I test some incomplete side projects that I'm working on:</h1>
 
         </div>
         <div style = {styles.project}>
