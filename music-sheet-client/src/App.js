@@ -1,3 +1,15 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+
+
+
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
@@ -10,7 +22,20 @@ import urlShortener from './components/urlShortener';
 import Stockgame from './components/stockGame.js';
 const App = () => {
 
-
+  const firebaseConfig = {
+    apiKey: "AIzaSyBeMwmTfSvJsVZe9Iogo1t9514go5pwhy8",
+    authDomain: "personal-website-17efd.firebaseapp.com",
+    projectId: "personal-website-17efd",
+    storageBucket: "personal-website-17efd.appspot.com",
+    messagingSenderId: "67159525574",
+    appId: "1:67159525574:web:84a2e57ac2c061020c6fc7",
+    measurementId: "G-RX05E30CMP"
+  };
+  
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  
   const styles = {
     cont: {
       display: "flex",
